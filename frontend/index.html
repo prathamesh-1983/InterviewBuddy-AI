@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>InterviewBuddy AI</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="background-orb orb-one"></div>
+  <div class="background-orb orb-two"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">IB</div>
+      <div>
+        <strong>InterviewBuddy</strong>
+        <span>Local AI Interview Coach</span>
+      </div>
+    </div>
+    <div class="status-pill" id="statusPill">
+      <span class="status-dot"></span>
+      <span id="statusText">Checking AI...</span>
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="setupView" class="view">
+      <div class="hero">
+        <div class="eyebrow">BUILT FOR A FRIEND • OPEN AI • LOCAL FIRST</div>
+        <h1>Practice interviews with an AI coach that runs on your machine.</h1>
+        <p class="hero-copy">
+          Upload a resume, choose a role, and let Gemma create a personalized
+          mock interview. Your core AI workflow can run locally through Ollama.
+        </p>
+      </div>
+
+      <div class="grid-two">
+        <section class="card">
+          <div class="card-heading">
+            <div>
+              <h2>1. Candidate profile</h2>
+              <p>Use a real resume or paste a short profile.</p>
+            </div>
+            <span class="step">01</span>
+          </div>
+
+          <label class="upload-box" for="resumeFile">
+            <span class="upload-icon">↑</span>
+            <strong>Upload resume</strong>
+            <span>PDF, DOCX or TXT</span>
+            <input id="resumeFile" type="file" accept=".pdf,.docx,.txt" hidden />
+          </label>
+
+          <div id="fileStatus" class="file-status">No file selected.</div>
+
+          <div class="divider"><span>OR</span></div>
+
+          <label class="label" for="resumeText">Paste resume/profile</label>
+          <textarea
+            id="resumeText"
+            rows="10"
+            placeholder="Example: B.Sc. IT graduate with Excel, Python and Power BI skills..."
+          ></textarea>
+        </section>
+
+        <section class="card">
+          <div class="card-heading">
+            <div>
+              <h2>2. Interview setup</h2>
+              <p>Tell the coach what you are preparing for.</p>
+            </div>
+            <span class="step">02</span>
+          </div>
+
+          <label class="label" for="role">Target job role</label>
+          <input id="role" value="Data Analyst" placeholder="e.g. Data Analyst" />
+
+          <label class="label" for="difficulty">Difficulty</label>
+          <select id="difficulty">
+            <option>Beginner</option>
+            <option selected>Intermediate</option>
+            <option>Advanced</option>
+          </select>
+
+          <label class="label" for="questionCount">Questions</label>
+          <select id="questionCount">
+            <option value="3">3 — Quick practice</option>
+            <option value="5" selected>5 — Standard</option>
+            <option value="7">7 — Deep practice</option>
+            <option value="10">10 — Full practice</option>
+          </select>
+
+          <button class="primary-button" id="startButton">
+            Start AI Interview <span>→</span>
+          </button>
+
+          <p class="privacy-note">
+            🔒 Resume text is processed by your local application and sent to
+            your locally running Ollama model for AI generation.
+          </p>
+        </section>
+      </div>
+
+      <section class="how-card">
+        <div>
+          <span class="mini-label">HOW IT WORKS</span>
+          <h3>Your resume → Gemma → personalized questions → feedback</h3>
+        </div>
+        <div class="flow">
+          <span>Resume</span><b>→</b><span>FastAPI</span><b>→</b><span>Gemma</span><b>→</b><span>Coach</span>
+        </div>
+      </section>
+
+      <div id="errorBox" class="error-box hidden"></div>
+    </section>
+
+    <section id="interviewView" class="view hidden">
+      <div class="interview-header">
+        <div>
+          <div class="eyebrow">LIVE PRACTICE SESSION</div>
+          <h1 id="interviewRole">Data Analyst Interview</h1>
+        </div>
+        <button class="ghost-button" id="quitButton">Exit</button>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span id="progressText">Question 1 of 5</span>
+          <span id="progressPercent">20%</span>
+        </div>
+        <div class="progress-bar"><div id="progressFill"></div></div>
+      </div>
+
+      <div class="grid-two interview-grid">
+        <section class="card question-card">
+          <div class="question-meta">
+            <span id="questionType">TECHNICAL</span>
+            <span id="questionNumber">Q1</span>
+          </div>
+          <h2 id="questionText">Loading question...</h2>
+          <p id="whyText"></p>
+
+          <div class="answer-area">
+            <label class="label" for="answerText">Your answer</label>
+            <textarea id="answerText" rows="12" placeholder="Type your answer as if you were speaking to the interviewer..."></textarea>
+          </div>
+
+          <button class="primary-button" id="submitAnswerButton">
+            Submit answer <span>→</span>
+          </button>
+        </section>
+
+        <aside class="card coach-card">
+          <div class="coach-avatar">AI</div>
+          <h3>Interview Coach</h3>
+          <p id="coachMessage">
+            Take a moment to structure your answer. Specific examples are more useful than generic statements.
+          </p>
+          <div class="tip-list">
+            <div><b>01</b> Be specific</div>
+            <div><b>02</b> Explain your action</div>
+            <div><b>03</b> Share the result</div>
+          </div>
+        </aside>
+      </div>
+
+      <div id="feedbackPanel" class="card feedback-panel hidden">
+        <div class="feedback-top">
+          <div>
+            <span class="mini-label">AI FEEDBACK</span>
+            <h2 id="feedbackVerdict">Good answer</h2>
+          </div>
+          <div class="score-circle" id="scoreCircle">--</div>
+        </div>
+
+        <div class="feedback-grid">
+          <div>
+            <h4>Strengths</h4>
+            <ul id="strengthsList"></ul>
+          </div>
+          <div>
+            <h4>Improve</h4>
+            <ul id="improvementsList"></ul>
+          </div>
+          <div>
+            <h4>Missing points</h4>
+            <ul id="missingList"></ul>
+          </div>
+        </div>
+
+        <div class="outline-box">
+          <h4>Better answer structure</h4>
+          <ol id="outlineList"></ol>
+        </div>
+
+        <button class="primary-button" id="nextButton">Next question <span>→</span></button>
+      </div>
+    </section>
+
+    <section id="resultsView" class="view hidden">
+      <div class="results-hero">
+        <div class="eyebrow">SESSION COMPLETE</div>
+        <h1>Your practice report</h1>
+        <p>Use this feedback as a practice plan, not as a hiring prediction.</p>
+      </div>
+
+      <div class="score-card card">
+        <div>
+          <span class="mini-label">PRACTICE SCORE</span>
+          <div class="big-score" id="overallScore">--</div>
+        </div>
+        <div class="score-summary">
+          <h2 id="summaryTitle">Keep practicing.</h2>
+          <p id="summaryText"></p>
+        </div>
+      </div>
+
+      <div class="grid-three">
+        <section class="card">
+          <h3>Top strengths</h3>
+          <ul id="topStrengths"></ul>
+        </section>
+        <section class="card">
+          <h3>Top improvements</h3>
+          <ul id="topImprovements"></ul>
+        </section>
+        <section class="card">
+          <h3>3-day practice plan</h3>
+          <div id="practicePlan"></div>
+        </section>
+      </div>
+
+      <div class="results-actions">
+        <button class="primary-button" id="newInterviewButton">Start another interview</button>
+        <button class="ghost-button" id="viewSessionsButton">View saved sessions</button>
+      </div>
+
+      <section id="sessionsPanel" class="card hidden">
+        <h2>Saved sessions</h2>
+        <div id="sessionsList"></div>
+      </section>
+    </section>
+  </main>
+
+  <div id="loadingOverlay" class="loading-overlay hidden">
+    <div class="loader-card">
+      <div class="spinner"></div>
+      <h3 id="loadingTitle">Gemma is thinking...</h3>
+      <p id="loadingMessage">Local AI can take a little longer on a CPU.</p>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
